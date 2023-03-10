@@ -16,12 +16,12 @@ class DetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
         setSupportActionBar(toolbar)
-        val statusNameValue = findViewById<TextView>(R.id.statusNameValue)
-        val fileNameValue = findViewById<TextView>(R.id.fileNameValue)
+        val statusValue = findViewById<TextView>(R.id.statusNameValue)
+        val nameValue = findViewById<TextView>(R.id.fileNameValue)
         val animationIdLayout = findViewById<MotionLayout>(R.id.animationIdLayout)
 
-        statusNameValue.text = intent.getStringExtra("state").toString()
-        fileNameValue.text = intent.getStringExtra("body").toString()
+        statusValue.text = intent.getStringExtra("state").toString()
+        nameValue.text = intent.getStringExtra("body").toString()
 
         object : CountDownTimer(1500, 1500) {
             override fun onTick(millisUntilFinished: Long) {

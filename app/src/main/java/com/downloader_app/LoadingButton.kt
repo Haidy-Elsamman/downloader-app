@@ -2,38 +2,72 @@ package com.downloader_app
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.*
+import android.content.res.Resources.Theme
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
-import android.view.animation.DecelerateInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.content.withStyledAttributes
 import kotlinx.android.synthetic.main.content_main.view.*
 
 
 class LoadingButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-    private lateinit var bitmap: Bitmap
-    private lateinit var customCanvas: Canvas
-    private var customWidth = 0
-    private var customHeight = 0
-    private val drawColor = ResourcesCompat.getColor(resources, R.color.colorPrimaryDark, null)
+    lateinit var bitmap: Bitmap
+    lateinit var customCanvas: Canvas
+    var customWidth: Int = 0
+    var customHeight: Int = 0
+    var drawColor: Int = 0
+    var durationForAnimation: Long = 0
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        customWidth = resolveSizeAndState(
+            (paddingLeft + paddingRight + suggestedMinimumWidth),
+            widthMeasureSpec,
+            2
+        )
+        customHeight = resolveSizeAndState(
+            MeasureSpec.getSize(
+                resolveSizeAndState(
+                    (paddingLeft + paddingRight + suggestedMinimumWidth),
+                    widthMeasureSpec,
+                    2
+                )
+            ), heightMeasureSpec, 2
+        )
+        setMeasuredDimension(customWidth, customHeight)
+    }
+
+    init {
+        context.withStyledAttributes(attrs, R.styleable.LoadingButton) {
+            drawColor = getColor(R.styleable.LoadingButton_CirclePaintColor, 2)
+            durationForAnimation = getInteger(R.styleable.LoadingButton_DurationTime, 2).toLong()
+        }
+
+    }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        canvas!!.drawBitmap(bitmap, 10f, 10f, null)
+        val paint: Paint? = null
+        canvas!!.drawBitmap(bitmap, 15f, 15f, paint)
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val minWidth: Int = paddingLeft + paddingRight + suggestedMinimumWidth
-        val measuredWidth: Int = resolveSizeAndState(minWidth, widthMeasureSpec, 1)
-        val measuredHeight: Int = resolveSizeAndState(
-            MeasureSpec.getSize(measuredWidth), heightMeasureSpec, 1
+
+    fun animatorLoading(binding: View): ValueAnimator? {
+        var effectAnimator = ValueAnimator.ofInt(
+            binding.loading_button.layoutParams.width, custom_button.customWidth
         )
-        customWidth = measuredWidth
-        customHeight = measuredHeight
-        setMeasuredDimension(measuredWidth, measuredHeight)
+        effectAnimator.addUpdateListener { animation ->
+            binding.loading_button.layoutParams.width = animation.animatedValue as Int
+            binding.loading_button.requestLayout()
+        }
+        effectAnimator.duration = durationForAnimation
+        effectAnimator.start()
+        return effectAnimator
     }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
@@ -43,54 +77,33 @@ class LoadingButton @JvmOverloads constructor(
         customCanvas = Canvas(bitmap)
     }
 
-    fun animateLoadingLayout(binding: View): ValueAnimator? {
-        val animator = ValueAnimator.ofInt(
-            binding.loading_button.layoutParams.width, custom_button.customWidth
-        )
-        animator.interpolator = DecelerateInterpolator()
-        animator.addUpdateListener { animation ->
-            binding.loading_button.layoutParams.width = animation.animatedValue as Int
-            binding.loading_button.requestLayout()
-        }
-        animator.duration = 2200
-        animator.start()
-        animator.doOnEnd {
-            binding.loading_button.layoutParams.width = 0
-            binding.loading_button.invalidate()
-        }
-        return animator
-    }
-
-    fun moveImageInCircle() {
-        val animator = ValueAnimator.ofFloat(10F, 370F)
-        val rectangle = RectF(120f, 60f, 170f, 100f)
+    fun animatorCircle() {
+        val valueAnimatorCircle = ValueAnimator.ofFloat(15F, 360F)
         val paint = Paint()
-        paint.isAntiAlias = true
         paint.color = drawColor
         paint.style = Paint.Style.FILL_AND_STROKE
         paint.strokeWidth = 45F
-        animator.interpolator = DecelerateInterpolator()
-        animator.addUpdateListener { animation ->
-            customCanvas.drawArc(rectangle, 10f, animation.animatedValue as Float, false, paint)
+        valueAnimatorCircle.addUpdateListener { animation ->
+            customCanvas.drawArc(
+                (RectF(120f, 60f, 170f, 100f)),
+                10f,
+                animation.animatedValue as Float,
+                false,
+                paint
+            )
         }
 
-        animator.duration = 2200
-        animator.start()
-        animator.doOnEnd {
-            reverseMoveImageInCircle()
+        valueAnimatorCircle.duration = durationForAnimation
+        valueAnimatorCircle.start()
+        valueAnimatorCircle.doOnEnd {
+            val paint = Paint()
+            val theme: Theme? = null
+            paint.color = ResourcesCompat.getColor(resources, R.color.colorPrimary, theme)
+            paint.style = Paint.Style.FILL_AND_STROKE
+            paint.strokeWidth = 50F
+            customCanvas.drawArc((RectF(120f, 60f, 170f, 100f)), 10f, 360F, false, paint)
         }
     }
 
-    private fun reverseMoveImageInCircle() {
-
-        val rectangle = RectF(120f, 60f, 170f, 100f)
-        val paint = Paint()
-        paint.isAntiAlias = true
-        paint.color = ResourcesCompat.getColor(resources, R.color.colorPrimary, null)
-        paint.style = Paint.Style.FILL_AND_STROKE
-        paint.strokeWidth = 45F
-        customCanvas.drawArc(rectangle, 10f, 360F, false, paint)
-
-    }
 
 }
