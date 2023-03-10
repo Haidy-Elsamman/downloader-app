@@ -7,11 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -22,9 +24,9 @@ import kotlinx.android.synthetic.main.content_main.view.*
 
 class MainFragment : Fragment() {
     lateinit var binding: FragmentMainBinding
-    private var downloadID: Long = 0
     private var state = false
     private var radioButton: Int = 0
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
