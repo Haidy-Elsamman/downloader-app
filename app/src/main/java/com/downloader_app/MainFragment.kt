@@ -26,6 +26,7 @@ class MainFragment : Fragment() {
     lateinit var binding: FragmentMainBinding
     private var state = false
     private var radioButton: Int = 0
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,18 +53,13 @@ class MainFragment : Fragment() {
             }
             radioButton = binding.root.radioGroup.checkedRadioButtonId
             if (radioButton > 0) {
-                var title ="Loading"
+                var title = "Loading"
                 binding.root.textView.text = "Loading"
                 val animator = custom_button.animatorLoading(binding.root)
                 custom_button.animatorCircle()
-                val request =
-                    DownloadManager.Request(Uri.parse(URL))
-                        .setTitle(getString(R.string.app_name))
-                        .setDescription(getString(R.string.app_description))
-                        .setRequiresCharging(false)
-
+                download()
                 animator!!.doOnEnd {
-                    title ="Download"
+                    title = "Download"
                     binding.root.textView.text = title
                     val myIntent = Intent(binding.root.context, DetailActivity::class.java)
                     var body = " "
@@ -75,23 +71,25 @@ class MainFragment : Fragment() {
                         resources.getString(R.string.retrofit_type_safe_http_client_for_android)
                     when (radioButton) {
                         binding.root.glide_button.id -> body = bodyGlide
-                        binding.root.loadapp_button.id -> body =bodyLoadApp
-                        binding.root.retrofit_button.id -> body =bodyRetrofit
+                        binding.root.loadapp_button.id -> body = bodyLoadApp
+                        binding.root.retrofit_button.id -> body = bodyRetrofit
                     }
                     myIntent.putExtra("body", body)
                     myIntent.putExtra("state", state.toString())
 
-                    Notifications(binding.root.context, (PendingIntent.getActivity(
-                        binding.root.context,
-                        5,
-                        Intent(),
-                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                    )), ( PendingIntent.getActivity(
-                        binding.root.context,
-                        5,
-                        myIntent,
-                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                    )))
+                    Notifications(
+                        binding.root.context, (PendingIntent.getActivity(
+                            binding.root.context,
+                            5,
+                            Intent(),
+                            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                        )), (PendingIntent.getActivity(
+                            binding.root.context,
+                            5,
+                            myIntent,
+                            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                        ))
+                    )
                         .getNotification(
                             binding.root.context.getSystemService(Context.NOTIFICATION_SERVICE),
                             title,
@@ -118,6 +116,14 @@ class MainFragment : Fragment() {
 
         }
         return binding.root
+    }
+
+    private fun download() {
+        val request =
+            DownloadManager.Request(Uri.parse(URL))
+                .setTitle(getString(R.string.app_name))
+                .setDescription(getString(R.string.app_description))
+                .setRequiresCharging(false)
     }
 
 
